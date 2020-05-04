@@ -60,19 +60,18 @@ Logout API
 #### Network Manager
 
 ### Record List Scene
-
 #### Overview
-
 <pre>
-Main API
+getFolders API
   |
-  Branch A  ->  <a href='www.google.com'>API 1</a>   ->  API 2   ->  API 3
+  Query doesn't exist -> <a href='https://www.google.com'>createQuery API</a> -> createResultSet API -> getResultSet API
   |
-  Branch B  ->  API 2   ->  API 3
+  Query exists -> createResultSet API -> getResultSet API
 </pre>
 
-    
-    
+#### Details
+
+##### getFolders API
 
 1. Whenever the view controller `RecordListVC` is loaded or refreshed, call the function `getFolders()`. 
 
@@ -82,46 +81,60 @@ Main API
 
 	* If the Traxiem getFolders REST API call is successfully made, decode the data to an array of Folder structs `[Folder]`. 
 
-		* If the query doesn't already exist under Personal Folders in Traxiem for the logged in user, call the function `createQuery(in parentFolderDbId: String, with name: String)` using the dbId of the personal folder and the name of the query. 
-
-			1. Make the function `createQuery(in parentFolderDbId: String, with name: String)` call the `createQuery(in parentFolderDbId: String, named name: String, completion: @escaping(Result<Data?, ApiError>) -> Void)` function in the class `TRXNetworkManager`. This will get the token, repo, URL request, the HTTP Method (POST), and the request body required to execute the API call. For the request body, use the name of the query to obtain the the query definition from the .json file which has the same name as the query. NOTE
-				
-			2. Invoke the Traxiem createQuery REST API call.
-
-				* If the Traxiem createQuery REST API call is successfully made, decode the data to the struct `QueryDef` and call the `createResultSet(for queryDbId: String)` function using the dbId of the query. 
-				
-					1. Make the function `createResultSet(for queryDbId: String)` call the `createResultSet(for queryDbId: String, completion: @escaping(Result<Data?, ApiError>) -> Void)` function in the class `TRXNetworkManager`. This will get the token, repo, URL request, the HTTP Method (POST), and the request body required to execute the API call. The request body contains `["pageSize": "999"]`. 
-			
-					2. Invoke the Traxiem createResultSet REST API call.
+		* If the query doesn't already exist under Personal Folders in Traxiem for the logged in user, see [LINK FOR QUERY DOESN'T EXIST].
 		
-						* If the Traxiem createResultSet REST API call is successfully made, the decode the data to the struct `ResultSet` and call the `getResultSet(of resultSetId: String, for queryDbId: String)` function using the Id of the result set and the dbId of the query.
-		
-							1. Make the function `getResultSet(of resultSetId: String, for queryDbId: String)` call the `getResultSet(of resultSetId: String, for queryDbId: String, completion: @escaping(Result<Data?, ApiError>) -> Void)` function in the class `TRXNetworkManager`. This will get the token, repo, the HTTP Method (GET), and the URL request required to execute the API call.
-					 
-							2. Invoke the Traxiem getResultSet REST API call.
-			
-								* If the Traxiem getResultSet REST API call is successfully made, decode the data to the struct `ResultSetPage`. 
-								
-									1. In the function `tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell`, configure each cell in the table as a `RecordListCell` using the defects inside the array of ResultSetRow structs `[ResultSetRow]`.
-				
-								* If the Traxiem getResultSet REST API call fails, print the error status to the console.
-	
-						* If the Traxiem createResultSet REST API call fails, print the error status to the console.
-	
-				* If the Traxiem createQuery REST API call fails, print the error status to the console.
-
-
-		* If the query already exists under the Personal Folder in Traxiem for the logged in user, call the `createResultSet(for queryDbId: String)` function using the dbId of the query. 
-
-			1. Make the function `createResultSet(for queryDbId: String)` call the `createResultSet(for queryDbId: String, completion: @escaping(Result<Data?, ApiError>) -> Void)` function in the class `TRXNetworkManager`. This will get the token, repo, URL request, the HTTP Method (POST), and the request body required to execute the API call. The request body contains `["pageSize": "999"]`. 
-		
-			2. Invoke the Traxiem createResultSet REST API call.
-	
-				* If the Traxiem createResultSet REST API call is successfully made, decode the data to the struct `ResultSet` and call the `getResultSet(of resultSetId: String, for queryDbId: String)` function using the Id of the result set and the dbId of the query.
-	
-				* If the Traxiem createResultSet REST API call fails, print the error status to the console.
-
+		* If the query already exists under the Personal Folder in Traxiem for the logged in user, see [LINK FOR QUERY EXISTS]. 	
 	* If the Traxiem getFolders REST API call fails, print the error status to the console.
+	
+##### Query doesn't exist
+
+Since the query doesn't already exist under the Personal Folder in Traxiem for the logged in user, see [LINK FOR createQuery API] to create the query.
+
+##### Query exists
+
+Since the query already exists under the Personal Folder in Traxiem for the logged in user, see [LINK FOR createResultSet API] to create the result set of the existing query.
+
+##### createQuery API
+
+1. Call the function `createQuery(in parentFolderDbId: String, with name: String)` using the dbId of the personal folder and the name of the query. 
+
+2. Make the function `createQuery(in parentFolderDbId: String, with name: String)` call the `createQuery(in parentFolderDbId: String, named name: String, completion: @escaping(Result<Data?, ApiError>) -> Void)` function in the class `TRXNetworkManager`. This will get the token, repo, URL request, the HTTP Method (POST), and the request body required to execute the API call. For the request body, use the name of the query to obtain the the query definition from the .json file which has the same name as the query. NOTE
+				
+3. Invoke the Traxiem createQuery REST API call.
+
+	* If the Traxiem createQuery REST API call is successfully made, decode the data to the struct `QueryDef`.
+	
+		1. See [LINK FOR createResultSet API] to create the result set of the query.
+		
+	* If the Traxiem createQuery REST API call fails, print the error status to the console.
+
+##### createResultSet API	
+	
+1. Call the `createResultSet(for queryDbId: String)` function using the dbId of the query. 
+				
+2. Make the function `createResultSet(for queryDbId: String)` call the `createResultSet(for queryDbId: String, completion: @escaping(Result<Data?, ApiError>) -> Void)` function in the class `TRXNetworkManager`. This will get the token, repo, URL request, the HTTP Method (POST), and the request body required to execute the API call. The request body contains `["pageSize": "999"]`. 
+			
+3. Invoke the Traxiem createResultSet REST API call.
+		
+	* If the Traxiem createResultSet REST API call is successfully made, the decode the data to the struct `ResultSet`.
+
+		1. See [LINK FOR getResultSet API] to get the result set of the query.
+		
+	* If the Traxiem createResultSet REST API call fails, print the error status to the console.
+
+##### getResultSet API
+
+1. Call the `getResultSet(of resultSetId: String, for queryDbId: String)` function using the Id of the result set and the dbId of the query.
+		
+2. Make the function `getResultSet(of resultSetId: String, for queryDbId: String)` call the `getResultSet(of resultSetId: String, for queryDbId: String, completion: @escaping(Result<Data?, ApiError>) -> Void)` function in the class `TRXNetworkManager`. This will get the token, repo, the HTTP Method (GET), and the URL request required to execute the API call.
+					 
+3. Invoke the Traxiem getResultSet REST API call.
+			
+	* If the Traxiem getResultSet REST API call is successfully made, decode the data to the struct `ResultSetPage`. 
+								
+		1. In the function `tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell`, configure each cell in the table as a `RecordListCell` using the defects inside the array of ResultSetRow structs `[ResultSetRow]`.
+				
+	* If the Traxiem getResultSet REST API call fails, print the error status to the console.
 
 ### Record Detail Scene
 
