@@ -9,8 +9,6 @@ This is a place where I store ideas, resources, and share and discuss things wit
 
 
 
-
-
 # Traxiem Defect Tracking App for iOS
 Traxiem iOS app for defect tracking that allows the creation, editing, and deletion of defects.
 
@@ -145,9 +143,9 @@ The Record Detail Scene displays a list of fields of a record. The list of recor
 <pre>
 <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#getrecord-api'>getRecord API</a>
   |
-  Modify -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (empty request body)</a> -> Editing complete -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (filled request body)</a>
+  Modify -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (edit)</a> -> Editing complete -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (save)</a>
   |
-  Change state -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#getrecordtype-api'>getRecordType API</a> -> State selected -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (empty request body)</a> -> Editing complete -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (filled request body)</a>
+  Change state -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#getrecordtype-api'>getRecordType API</a> -> State selected -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (edit)</a> -> Editing complete -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (save)</a>
   |
   Delete -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#deleterecord-api'>deleteRecord API</a> 
 </pre>
@@ -170,7 +168,11 @@ The Record Detail Scene displays a list of fields of a record. The list of recor
 	
 ##### modifyRecord API
 
-1.  Call the function `modifyRecord(_ recordId: String, _ operation: String, body: [String: [[String: String?]]], actionName: String?)` using the record Id, the operation, the request body, and the action name (Modify).  
+1.  Call the function `modifyRecord(_ recordId: String, _ operation: String, body: [String: [[String: String?]]], actionName: String?)` using the record Id, the operation, the request body, and the action name (Modify). The modifyRecord API can be used to fulfill two operations:
+
+	* Edit: Set the opertion parameter to `Edit` and the request body as `[:]`. 
+	
+	* Save: Set the opertion parameter to `Commit` and fill out the request body (NOTE: find the function that fills out the request body).  
 	
 2. Make the function `modifyRecord(_ recordId: String, _ operation: String, body: [String: [[String: String?]]], actionName: String?)` call the `modifyRecord(with recordId: String, body: [String: [[String: String?]]], operation: String, actionName: String?, completion: @escaping(Result<Data?, ApiError>) -> Void)` function in the class `TRXNetworkManager`. This will get the token, repo, the HTTP Method (PATCH), and the URL request required to execute the API call. 
 	
