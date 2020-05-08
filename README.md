@@ -145,9 +145,9 @@ The Record Detail Scene displays a list of fields of a record. The list of recor
 <pre>
 <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#getrecord-api'>getRecord API</a>
   |
-  Modify -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API</a> -> Done button -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API</a>
+  Modify -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (empty request body)</a> -> Editing complete -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (filled request body)</a>
   |
-  Change state -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#getrecordtype-api'>getRecordType API</a> -> State done button -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'> modifyRecord API</a> -> Done button -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API</a>
+  Change state -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#getrecordtype-api'>getRecordType API</a> -> State selected -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (empty request body)</a> -> Editing complete -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (filled request body)</a>
   |
   Delete -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#deleterecord-api'>deleteRecord API</a> 
 </pre>
