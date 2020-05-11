@@ -136,16 +136,22 @@ The Record List Scene displays a list of records, either a list of records assig
 
 #### Overview
 
-The Record Detail Scene displays a list of fields of a record. The list of records is obtained by the results of invoking Traxiem record REST APIs. There are three possible actions a user can take: modify, change state, or delete the record. If the modify action is selected, make the record enter interactive editing mode and allow the user to be able to modify the editable fields of the record. If the change state action is selected, allow the user to choose the desired state and then make the record enter interactive editing mode once the user taps on the done button. Save the updated fields of the record when the user taps on the done button. If the delete action is selected, delete the record.
+The Record Detail Scene displays a list of fields of a record. The list of record fields is obtained by the results of invoking Traxiem record REST APIs. There are three possible actions a user can take: modify, change state, or delete the record. 
+
+If the modify action is selected, make the record enter interactive editing mode and allow the user to modify the editable fields of the record. When the user edits a field, except for the `Headline` field, display a list of possible field values to choose. Once the editing is completed, save the updated fields of the record. 
+
+If the change state action is selected, display a list of possible states the record can change to. Once the user selects a state, the process is the same as when the modify action is selected.
+
+If the delete action is selected, delete the record.
 
 #### Diagram
 
 <pre>
 <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#getrecord-api'>getRecord API</a>
   |
-  Modify -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (edit)</a> -> Editing complete -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (save)</a>
+  Modify -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (edit)</a> -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#getfield-api'>getField API</a> -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (save)</a>
   |
-  Change state -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#getrecordtype-api'>getRecordType API</a> -> State selected -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (edit)</a> -> Editing complete -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (save)</a>
+  Change state -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#getrecordtype-api'>getRecordType API</a> -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (edit)</a> -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#getfield-api'>getField API</a> -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (save)</a>
   |
   Delete -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#deleterecord-api'>deleteRecord API</a> 
 </pre>
@@ -172,7 +178,7 @@ The Record Detail Scene displays a list of fields of a record. The list of recor
 
 	* Edit: Set the opertion parameter to `Edit` and the request body as `[:]`. 
 	
-	* Save: Set the opertion parameter to `Commit` and fill out the request body (NOTE: find the function that fills out the request body).  
+	* Save: Set the opertion parameter to `Commit` and the request body will be filled once the user presses the `Done` button.
 	
 2. Make the function `modifyRecord(_ recordId: String, _ operation: String, body: [String: [[String: String?]]], actionName: String?)` call the `modifyRecord(with recordId: String, body: [String: [[String: String?]]], operation: String, actionName: String?, completion: @escaping(Result<Data?, ApiError>) -> Void)` function in the class `TRXNetworkManager`. This will get the token, repo, the HTTP Method (PATCH), and the URL request required to execute the API call. 
 	
@@ -180,9 +186,29 @@ The Record Detail Scene displays a list of fields of a record. The list of recor
 
 	* If the Traxiem modifyRecord REST API call is successfully made, decode the data to the struct `Record`. 
 	
-		* If the `Commit` operation was used to invoke the Traxiem modifyRecord REST API call, see [getRecord API](https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#getrecord-api) to view the updated fields in the record.
+		* If the `Commit` operation was used to invoke the Traxiem modifyRecord REST API call, see [getRecord API](https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#getrecord-api) to display the updated fields in the record.
 		
 	* If the Traxiem modifyRecord REST API call fails, print the error status to the console.
+
+##### deleteRecord API
+
+1. Call the function `deleteRecord(_ recordId: String)` using the record Id of the record.
+
+2. Make the function `deleteRecord(_ recordId: String)` call the `deleteRecord(with recordId: String, completion: @escaping(Result<Data?, ApiError>) -> Void)` function in the class `TRXNetworkManager`. This will get the token, repo, the HTTP Method (DELETE), and the URL request required to execute the API call.
+
+3. Invoke the Traxiem deleteRecord REST API call.
+
+	* If the Traxiem deleteRecord REST API call is successfully made, reload the data in the [Record List Scene](https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#record-list-scene).
+	
+	* If the Traxiem deleteRecord REST API call fails, print the error status to the console.
+
+### State Selection Scene
+
+#### Overview
+
+The State Selection Scene displays a list of possible states that the record can change to. The list of states is obtained from the result of invoking a Traxiem record REST API. The user can choose any state from the list.
+
+#### API Details
 
 ##### getRecordType API
 
@@ -198,23 +224,54 @@ The Record Detail Scene displays a list of fields of a record. The list of recor
 	
 	* If the Traxiem getRecordType REST API call fails, print the error status to the console.
 
-##### deleteRecord API
+### Field Selection Scene
 
-1. Call the function `deleteRecord(_ recordId: String)` using the record Id of the selected record.
+#### Overview
 
-2. Make the function `deleteRecord(_ recordId: String)` call the `deleteRecord(with recordId: String, completion: @escaping(Result<Data?, ApiError>) -> Void)` function in the class `TRXNetworkManager`. This will get the token, repo, the HTTP Method (DELETE), and the URL request required to execute the API call.
+The Field Selection Scene displays a list of field values for a specific field of a record. The list of field values is obtained from the result of invoking a Traxiem REST API. The user can choose any field value from the list.
 
-3. Invoke the Traxiem deleteRecord REST API call.
+#### API Details
 
-	* If the Traxiem deleteRecord REST API call is successfully made, reload the data in the [Record List Scene](https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#record-list-scene).
-	
-	* If the Traxiem deleteRecord REST API call fails, print the error status to the console.
+##### getField API
 
-#### Field Selection Scene	
-#### Description Scene
+1. When the view controller `FieldSelectionVC` is loaded, call the function `getField(_ recordId: String, _ fieldName: String)` using the record Id of the record and the name of the selected field.
+
+2. Make the function `getField(_ recordId: String, _ fieldName: String)` call the `getField(of recordId: String, with fieldName: String, completion: @escaping(Result<Data?, ApiError>) -> Void)` function in the class `TRXNetworkManager`. This will get the token, repo, the HTTP Method (GET), and the URL request required to execute the API call.
+
+3. Invoke the Traxiem getField REST API call.
+
+	* If the Traxiem getRecordType REST API call is successfully made, decode the data to the struct `Field`. 
+
+		1. In the function `tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell`, configure each cell in the table using the field values inside the `fieldChoiceList` array.
+
+	* If the Traxiem getField REST API call fails, print the error status to the console.
 
 ### Create Record Scene
-#### Field Selection Scene
-#### Description Scene
+
+#### Overview
+
+The Create Record Scene displays a list of empty fields of a newly created record. The list of record fields is obtained by the results of invoking a Traxiem REST API. When the record is created, make the record enter interactive editing mode and allow the user to modify the editable fields of the record. When the user edits a field, except for the `Headline` field, display a list of possible field values to choose. Once the editing is completed, save the updated fields of the record. 
+
+#### Diagram
+
+<pre>
+<a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#createrecord-api'>createRecord API</a> -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#getfield-api'>getField API</a> -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#modifyrecord-api'>modifyRecord API (save)</a>
+</pre>
+
+#### API Details
+
+##### createRecord API
+
+1. When the view controller `CreateRecordVC` is loaded, call the function `createRecord()`.
+
+2. Make the function `createRecord()` call the `createRecord(completion: @escaping(Result<Data?, ApiError>) -> Void)` function in the class `TRXNetworkManager`. This will get the token, repo, the HTTP Method (POST), the `Edit` operation, the empty request body, and the URL request required to execute the API call.
+
+3. Invoke the Traxiem createRecord REST API call.
+
+	* If the Traxiem createRecord REST API call is successfully made, decode the data to the struct `Record`. 
+
+		1. In the function `tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell`, configure each cell in the table as a `RecordFieldCell` using the fields inside the array of Field structs `[Field]`.
+
+	* If the Traxiem createRecord REST API call fails, print the error status to the console.
 
 ### Notifications
