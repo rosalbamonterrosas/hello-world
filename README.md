@@ -61,9 +61,6 @@ In the iOS Settings for Traxiem, allow banners, sounds, and badges notifications
 
 ## Development
 
-For each scene: View controller, Models, Data Source, specific API for viewing and for actions, Cells
-Queries
-
 ### Login Scene
 
 #### Overview
