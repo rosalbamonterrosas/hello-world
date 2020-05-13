@@ -10,28 +10,36 @@ This is a place where I store ideas, resources, and share and discuss things wit
 
 
 # Traxiem Defect Tracking App for iOS
+
 Traxiem iOS app for defect tracking that allows the creation, editing, and deletion of defects.
 
 ## Usage
+
 This app allows the user to login using the username, password, and selected repo. The app then displays the list of defects assigned to the user. A tab bar at the bottom of the screen allows the user to switch to the list of defects reported by the user. The user can swipe left on a specific defect to delete it, and tap the plus icon to create a new defect. The user can tap on a specific defect to view more details about the defect. When viewing a defect, the user has the option to modify, change state, or delete the defect. Notifications are sent to the user when a new defect has been assigned to the user and when any modifications are made to a defect that the user currently owns.
 
 ## Getting Started
+
 These instructions will get you a copy of the Xcode project on your local machine for development and testing purposes.
+
 ### Prerequisites
+
 Xcode needs to be downloaded from the App Store.
 Traxiem needs to be installed.
 
 ## Build the App
+
 To build the app in Xcode, click on Product in the menu bar and then click on Clean Build Folder.
 To run the app in Xcode, click on Product in the menu bar and then click on Run.
 To build and then run the app, click on the play icon in the top left corner.
 
 ## Install and Update
+
 To run the app in an iOS Simulator in Xcode, pick an iOS 12.0 or later Simulator from the list provided or choose the Download Simulators option. Then, build and run the app.
 
 To run the app on an iPhone, connect the iPhone to your local machine. In Xcode, select the Additional Simulators option and then click on the Devices tab. The iPhone will appear in the devices list in the left column. Select the iPhone and then build and run the app.
 
 ## License
+
 /*******************************************************************************
 
 (c) Copyright HCL Technologies Ltd. 2020. MIT Licensed!
@@ -39,39 +47,93 @@ To run the app on an iPhone, connect the iPhone to your local machine. In Xcode,
 *******************************************************************************/
 
 ## Configuration Properties
+
 ### Xcode
+
 Select the target and go to the Signing & Capabilities tab. Add the Background Modes capability and select Background fetch and Background processing.
 debug flag
+
 ### App
-In the login screen, tap on the gear icon at the top right corner of the screen to enter the URL of the Traxiem server.
-Enable notifications for the app in iOS Settings in order to receive banners, sound, and badge notifications. The user will receive notifications when a new defect has been assigned to the user and when any modifications are made to a defect that the user currently owns.
+
+In the login screen, tap on the gear icon at the top right corner of the screen to enter the base URL of the Traxiem server and the database.
+
+In the iOS Settings for Traxiem, allow banners, sounds, and badges notifications, and enable Background Refresh. The logged in user will receive notifications when a new defect has been assigned to the user or when any modifications are made to a defect that the user currently owns.
 
 ## Development
+
 For each scene: View controller, Models, Data Source, specific API for viewing and for actions, Cells
 Queries
-### App/Scene Delegate
 
 ### Login Scene
-Login authorization tokens
-Logout API
-#### Settings Scene
-#### Repo Selection Scene
-#### Network Manager
+
+#### Overview
+
+The Login Scene displays a username textbox, a password textbox, a repo button, and a settings icon. When the user selects the repo button, display the list of repos to choose. When the user selects the settings icon, display textboxes for the base URL of the Traxiem server and the database. Once the username, password, repo, database, and the base URL of the Traxiem server are provided by the user, login the user by invoking a Traxiem REST API. 
+
+#### Diagram
+
+<pre>
+<a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#getrepos-api'>getRepos API</a> -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#login-api'>login API</a>
+</pre>
+
+#### API Details
+
+##### login API
+
+1. Call the function `login(_ usernameText: String, _ passwordText: String)` using the username and password that the user provided. 
+
+2. Make the function `login(_ usernameText: String, _ passwordText: String)` call the `login(with username: String, password: String, repo: String, db: String, completion: @escaping(Result<Data?, ApiError>) -> Void)` function in the class `TRXNetworkManager` using the username, password, repo, and database that the user provided. This will get the HTTP Method (POST) and the URL request required to execute the API call.
+
+3. Invoke the Traxiem login REST API call.
+
+	* If the Traxiem login REST API call is successfully made, decode the data to the struct `AuthToken`.
+	
+		1. Store the token in the class `KeychainHelper` to make the token accessible for other Traxiem REST API calls. 
+
+	* If the Traxiem login REST API call fails, present an alert with the error message.
+
+### Repo Selection Scene
+
+#### Overview
+
+The Repo Selection Scene displays a list of repos. The list of repos is obtained from the result of invoking a Traxiem REST API. The user can choose any repo from the list.
+
+#### API Details
+
+##### getRepos API
+
+1. When the view controller `RepoSelectionVC` is loaded, call the function `fetchRepos()`.
+
+2. Make the function `fetchRepos()` call the `getRepos(completion: @escaping(Result<Data?, ApiError>) -> Void)` function in the class `TRXNetworkManager`. This will get the HTTP Method (GET) and the URL request required to execute the API call.
+
+3. Invoke the Traxiem getRepos REST API call.
+
+	* If the Traxiem getRepos REST API call is successfully made, decode the data to an array of Repo structs `[Repo]`. 
+
+		1. In the function `tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell`, configure each cell in the table using the repos inside the array of Repo structs `[Repo]`.
+
+	* If the Traxiem getRepos REST API call fails, print the error status to the console.
 
 ### Record List Scene
 
 #### Overview
 
-The Record List Scene displays a list of records, either a list of records assigned to the logged in user or a list of records reported by the logged in user. The list of records is obtained by the results of invoking Traxiem query REST APIs. First, determine whether the query already exists under the Personal Folder in Traxiem for the logged in user. If the query doesn't already  exist, create the query, create the result set of the query, and get the result set of the query. If the query already exists, it is not necessary to create the query again. Instead, create the result set of the existing query and then get the result set of the query.
+The Record List Scene displays a list of records, either a list of records assigned to the logged in user or a list of records reported by the logged in user. The list of records is obtained by the results of invoking Traxiem query REST APIs. 
+
+First, determine whether the query already exists under the Personal Folder in Traxiem for the logged in user. If the query doesn't already  exist, create the query, create the result set of the query, and get the result set of the query. 
+
+If the query already exists, it is not necessary to create the query again. Instead, create the result set of the existing query and then get the result set of the query.
+
+Give the user the option to logout.
 
 #### Diagram
 
 <pre>
-<a href='https://github.com/rosalbamonterrosas/hello-world/blob/master/README.md#getfolders-api'>getFolders API</a>
+<a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#getfolders-api'>getFolders API</a>
   |
-  Query not exists -> <a href='https://github.com/rosalbamonterrosas/hello-world/blob/master/README.md#createquery-api'>createQuery API</a> -> <a href='https://github.com/rosalbamonterrosas/hello-world/blob/master/README.md#createresultset-api'>createResultSet API</a> -> <a href='https://github.com/rosalbamonterrosas/hello-world/blob/master/README.md#getresultset-api'>getResultSet API</a>
+  Query not exists -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#createquery-api'>createQuery API</a> -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#createresultset-api'>createResultSet API</a> -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#getresultset-api'>getResultSet API</a>
   |
-  Query exists -> <a href='https://github.com/rosalbamonterrosas/hello-world/blob/master/README.md#createresultset-api'>createResultSet API</a> -> <a href='https://github.com/rosalbamonterrosas/hello-world/blob/master/README.md#getresultset-api'>getResultSet API</a>
+  Query exists -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#createresultset-api'>createResultSet API</a> -> <a href='https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#getresultset-api'>getResultSet API</a>
 </pre>
 
 #### API Details
@@ -85,9 +147,9 @@ The Record List Scene displays a list of records, either a list of records assig
 
 	* If the Traxiem getFolders REST API call is successfully made, decode the data to an array of Folder structs `[Folder]`. 
 
-		* If the query doesn't already exist under the Personal Folder in Traxiem for the logged in user, see the `Query not exists` branch in the [Diagram](https://github.com/rosalbamonterrosas/hello-world/blob/master/README.md#diagram).
+		* If the query doesn't already exist under the Personal Folder in Traxiem for the logged in user, see the `Query not exists` branch in the [Diagram](https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#diagram).
 		
-		* If the query already exists under the Personal Folder in Traxiem for the logged in user, see the `Query exists` branch in the [Diagram](https://github.com/rosalbamonterrosas/hello-world/blob/master/README.md#diagram). 	
+		* If the query already exists under the Personal Folder in Traxiem for the logged in user, see the `Query exists` branch in the [Diagram](https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#diagram). 	
 	* If the Traxiem getFolders REST API call fails, print the error status to the console.
 
 ##### createQuery API
@@ -100,7 +162,7 @@ The Record List Scene displays a list of records, either a list of records assig
 
 	* If the Traxiem createQuery REST API call is successfully made, decode the data to the struct `QueryDef`.
 	
-		1. See [createResultSet API](https://github.com/rosalbamonterrosas/hello-world/blob/master/README.md#createresultset-api) to create the result set of the query.
+		1. See [createResultSet API](https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#createresultset-api) to create the result set of the query.
 		
 	* If the Traxiem createQuery REST API call fails, print the error status to the console.
 
@@ -114,7 +176,7 @@ The Record List Scene displays a list of records, either a list of records assig
 		
 	* If the Traxiem createResultSet REST API call is successfully made, the decode the data to the struct `ResultSet`.
 
-		1. See [getResultSet API](https://github.com/rosalbamonterrosas/hello-world/blob/master/README.md#getresultset-api) to get the result set of the query.
+		1. See [getResultSet API](https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#getresultset-api) to get the result set of the query.
 		
 	* If the Traxiem createResultSet REST API call fails, print the error status to the console.
 
@@ -131,6 +193,18 @@ The Record List Scene displays a list of records, either a list of records assig
 		1. In the function `tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell`, configure each cell in the table as a `RecordListCell` using the defects inside the array of ResultSetRow structs `[ResultSetRow]`.
 				
 	* If the Traxiem getResultSet REST API call fails, print the error status to the console.
+
+##### logout API
+
+1. Call the function `logout()`.
+
+2. Make the function `logout()` call the `logoff(completion: @escaping(Result<Data?, ApiError>) -> Void)` function in the class `TRXNetworkManager`. This will get the token, the HTTP Method (POST), and the URL request required to execute the API call.
+
+3. Invoke the Traxiem logout REST API call.
+
+	* If the Traxiem logout REST API call is successfully made, dismiss the view controller to return to the [Login Scene](https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#login-scene). 
+
+	* If the Traxiem logout REST API call fails, print the error status to the console.
 	
 ### Record Detail Scene
 
@@ -138,7 +212,7 @@ The Record List Scene displays a list of records, either a list of records assig
 
 The Record Detail Scene displays a list of fields of a record. The list of record fields is obtained by the results of invoking Traxiem record REST APIs. There are three possible actions a user can take: modify, change state, or delete the record. 
 
-If the modify action is selected, make the record enter interactive editing mode and allow the user to modify the editable fields of the record. When the user edits a field, except for the `Headline` field, display a list of possible field values to choose. Once the editing is completed, save the updated fields of the record. 
+If the modify action is selected, make the record enter interactive editing mode and allow the user to modify the editable fields of the record. When the user edits a field, except for the `Headline` and `Description` fields, display a list of possible field values to choose. Once the editing is completed, save the updated fields of the record. 
 
 If the change state action is selected, display a list of possible states the record can change to. Once the user selects a state, the process is the same as when the modify action is selected.
 
@@ -250,7 +324,7 @@ The Field Selection Scene displays a list of field values for a specific field o
 
 #### Overview
 
-The Create Record Scene displays a list of empty fields of a newly created record. The list of record fields is obtained by the results of invoking a Traxiem REST API. When the record is created, make the record enter interactive editing mode and allow the user to modify the editable fields of the record. When the user edits a field, except for the `Headline` field, display a list of possible field values to choose. Once the editing is completed, save the updated fields of the record. 
+The Create Record Scene displays a list of empty fields of a newly created record. The list of record fields is obtained by the results of invoking a Traxiem REST API. When the record is created, make the record enter interactive editing mode and allow the user to modify the editable fields of the record. When the user edits a field, except for the `Headline` and `Description` fields, display a list of possible field values to choose. Once the editing is completed, save the updated fields of the record. 
 
 #### Diagram
 
@@ -275,3 +349,5 @@ The Create Record Scene displays a list of empty fields of a newly created recor
 	* If the Traxiem createRecord REST API call fails, print the error status to the console.
 
 ### Notifications
+
+Every five minutes, including when the app is in the background, check whether there are any new defects assigned to the logged in user or if any modifications have been made to a defect that the user currently owns. This is done using the same Traxiem query REST APIs that are implemented for the [Record List Scene](https://github01.hclpnp.com/traxiem/traxiem/tree/master/samples/traxiem-ios#record-list-scene). If there is at least one record in the result set of the query, trigger a notification for each record.
